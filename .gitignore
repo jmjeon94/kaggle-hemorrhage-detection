@@ -1,6 +1,5 @@
-/1st_kaggle
-stage_1_train_cls.csv
-test.png
+/dataset/stage_1_train_cls.csv
 /.idea
 /.ipynb_checkpoints
-
+/tensorboard
+/checkpoints
