@@ -5,4 +5,5 @@
 /checkpoints
 /1st_kaggle
 
-
+*/__pycache__
+/__pycache__
