@@ -8,7 +8,7 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
     elif phase == 'Valid' or phase == 'Test':
         model.eval()
 
-    tbar = tqdm(data_loader, position=0, leave=True)
+    tbar = tqdm(data_loader)
     for data in tbar:
 
         _, target, input_img = data
