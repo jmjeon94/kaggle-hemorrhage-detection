@@ -15,7 +15,8 @@ import torch.nn as nn
 test_dataset = HmDataset(df_path='./dataset/test.csv', transforms=transforms, mode=DATASET_MODE)
 test_loader = DataLoader(test_dataset,
                          batch_size=BATCH_SIZE,
-                         shuffle=True,
+                         shuffle=False,
+                         drop_last=False,
                          num_workers=4)
 
 # create model
