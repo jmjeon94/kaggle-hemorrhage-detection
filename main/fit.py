@@ -28,7 +28,10 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
 
         losses += loss.item()
 
-        tbar.set_description(
-            f'[{phase}]\tEpoch:[{epoch}/{EPOCHS}]\tLoss:{losses / len(data_loader):.5f}')  # '\tAcc:{acc:.2%}')
+        if phase == 'Train':
+            msg = f'[{phase}]\tEpoch:[{epoch}/{EPOCHS}]\tLoss:{losses / len(data_loader):.5f}'
+        else:
+            msg = f'[{phase}]\tLoss:{losses / len(data_loader):.5f}'
+        tbar.set_description(msg)
 
     return losses / len(data_loader)
