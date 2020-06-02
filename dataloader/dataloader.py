@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 from PIL import Image
 import pandas as pd
 import torch
+import numpy as np
 
 class HmDataset(Dataset):
     def __init__(self, df_path, transforms=None, mode='3ch'):
