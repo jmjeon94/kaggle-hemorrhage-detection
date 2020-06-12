@@ -3,7 +3,7 @@ RSNA Intracranial Hemorrhage Detection in kaggle<br>
 Leaderboard 1st source
 
 ## 1. 데이터 분석(EDA), dicom 추출(png로 변환)
-* 소스: data_analysis.ipynb
+* 소스: EDA_stage_1.ipynb, data_analysis.ipynb
 * dicom 추출은 2가지 방법
 ```
 1. 하나의 slice기준으로 n-1, n, n+1을 concatenate한다.
