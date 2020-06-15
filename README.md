@@ -2,6 +2,10 @@
 RSNA Intracranial Hemorrhage Detection in kaggle<br>
 Leaderboard 1st source
 
+## 0. 데이터셋 가공
+* 소스: make_dataset.ipynb
+* kaggle 제공 dataframe -> label, meta가 추가된 dataframe
+
 ## 1. 데이터 분석(EDA), dicom 추출(png로 변환)
 * 소스: EDA_stage_1.ipynb, data_analysis.ipynb
 * dicom 추출은 2가지 방법
@@ -11,7 +15,7 @@ Leaderboard 1st source
 ```
 
 ## 2. 데이터 분할 - Train/Valid/Test
-* 소스: make_dataset.ipynb
+* 소스: split_dataset.ipynb
 * 각각의 train.csv, valid.csv, test.csv로 분리
 
 ## 3. CNN 학습
