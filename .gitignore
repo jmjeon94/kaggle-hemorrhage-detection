@@ -1,5 +1,4 @@
-/dataset/stage_1_train_cls.csv
-/dataset/stage_1_train.csv
+/dataset
 /.idea
 /.ipynb_checkpoints
 /tensorboard
