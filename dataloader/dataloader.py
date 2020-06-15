@@ -15,7 +15,7 @@ class HmDataset(Dataset):
         filename = hm_meta.filename
         label = torch.from_numpy(hm_meta['epidural':'any'].values.astype(np.float))
 
-        img = Image.open('../dataset/kaggle_rsna(only100)/imgs/' + filename + '.png')
+        img = Image.open('../dataset/kaggle_rsna(only600)/imgs/' + filename + '.png')
 
         if self.mode == 'sequential':
             study_instance_uid = hm_meta.study_instance_uid
@@ -36,8 +36,8 @@ class HmDataset(Dataset):
             filename_next = tmp_df[tmp_df.slice_id == slice_id_next].iloc[0].filename
 
             # get prev, next img
-            img_prev = Image.open('../dataset/kaggle_rsna(only100)/imgs/' + filename_prev + '.png')
-            img_next = Image.open('../dataset/kaggle_rsna(only100)/imgs/' + filename_next + '.png')
+            img_prev = Image.open('../dataset/kaggle_rsna(only600)/imgs/' + filename_prev + '.png')
+            img_next = Image.open('../dataset/kaggle_rsna(only600)/imgs/' + filename_next + '.png')
 
             # concat 3 imgs
             img = np.concatenate([np.expand_dims(np.array(img)[:, :, 0], axis=2),

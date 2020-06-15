@@ -3,7 +3,7 @@ from datetime import datetime
 
 # dataset path
 DATA_DF_PATH = './dataset/'
-DATA_IMG_PATH = '../dataset/kaggle_rsna(only100)/'
+DATA_IMG_PATH = '../dataset/kaggle_rsna(only600)/'
 
 # hyper parameter
 MODEL_NAME = 'DenseNet121'
