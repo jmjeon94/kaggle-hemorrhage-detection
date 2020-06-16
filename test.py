@@ -1,19 +1,16 @@
 from utils.checkpoints import load_checkpoint
+from utils.metrics import print_metrics
 from constants import *
 from models.densenet121 import DenseNet121_change_avg
 from dataloader.dataloader import HmDataset
 from dataloader.transforms import build_transform
-from main.fit import fit
 
-import numpy as np
-import pandas as pd
-from PIL import Image
-
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 import torch.optim as optim
 import torch.nn as nn
 
 from tqdm import tqdm
+import numpy as np
 
 # get test data loader
 transforms = build_transform()
@@ -40,9 +37,10 @@ model = DenseNet121_change_avg()
 criterion = nn.BCELoss()
 optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
 
-model =  DenseNet121_change_avg()
+# load model weights
 model, _, _, epoch = load_checkpoint('./checkpoints/cnn/200615_135016_DenseNet121_LR0.001_BS64_BCELoss/030.pth', model, optimizer)
 
+# get device type
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
@@ -51,7 +49,23 @@ with torch.no_grad():
     
     # test_loss = fit('Test', epoch, model, test_loader, optimizer, criterion, device)
 
-    for i, (filename, targets, inputs) in enumerate(tqdm(test_loader, position=0, leave=True)):
+    for i, (filename, targets, inputs) in enumerate(tqdm(train_loader, position=0, leave=True)):
+
+        # get data
         inputs, targets = inputs.to(device), targets.to(device)
-        
-        preds, feas = model(inputs)
+
+        # inference
+        preds, _ = model(inputs)
+
+        # cuda to cpu(numpy)
+        preds = preds.cpu().detach().numpy().round()
+        targets = targets.cpu().detach().numpy()
+
+        if i == 0:
+            y_true = targets
+            y_pred = preds
+        else:
+            y_true = np.concatenate([y_true, targets], axis=0)
+            y_pred = np.concatenate([y_pred, preds], axis=0)
+
+    print_metrics(y_true, y_pred)
