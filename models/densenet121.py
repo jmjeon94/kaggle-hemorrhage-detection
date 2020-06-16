@@ -8,7 +8,6 @@ class DenseNet121_change_avg(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.relu = nn.ReLU()
         self.mlp = nn.Linear(1024, 6)
-        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.densenet121(x)
@@ -16,7 +15,6 @@ class DenseNet121_change_avg(nn.Module):
         x = self.avgpool(x)
         x_features = x.view(-1, 1024)
         x = self.mlp(x_features)
-        x = self.sigmoid(x)
 
         return x, x_features
 
