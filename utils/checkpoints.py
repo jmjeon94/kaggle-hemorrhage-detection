@@ -2,8 +2,12 @@ import os
 import torch
 from constants import *
 
-def save_checkpoint(epoch, model, optimizer, scheduler=None):
-    save_folder_dir = os.path.join(MODEL_WEIGHTS_SAVE_PATH, TRAIN_ID)
+def save_checkpoint(epoch, model, optimizer, phase, id_, scheduler=None):
+    
+    if not phase in ['cnn', 'rnn']:
+        raise ValueError('not supported phase[{}]'.format(phase))
+    
+    save_folder_dir = os.path.join(MODEL_WEIGHTS_SAVE_PATH, phase, id_)
     if not os.path.exists(save_folder_dir):
         os.makedirs(save_folder_dir, exist_ok=True)
     model_save_path = os.path.join(save_folder_dir, f'{epoch:03d}.pth')

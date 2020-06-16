@@ -1,3 +1,6 @@
 import torchvision.transforms as T
-transforms = T.Compose([T.Resize([256,256]),
+
+def build_transform():
+    transforms = T.Compose([T.Resize([256,256]),
                         T.ToTensor()])
+    return transforms

@@ -8,8 +8,8 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
     elif phase == 'Valid' or phase == 'Test':
         model.eval()
 
-    tbar = tqdm(data_loader, position=0)
-    for data in tbar:
+    tbar = tqdm(data_loader, position=0, leave=True)
+    for i, data in enumerate(tbar):
 
         _, target, input_img = data
         target, input_img = target.to(device), input_img.to(device)
@@ -22,9 +22,6 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
         if phase == 'Train':
             loss.backward()
             optimizer.step()
-
-        #         predicted_label_thresholded = predicted_label>0.5
-        #         acc = (predicted_label_thresholded==target).sum() #
 
         losses += loss.item()
 

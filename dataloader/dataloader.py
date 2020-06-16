@@ -3,7 +3,10 @@ from PIL import Image
 import pandas as pd
 import torch
 import numpy as np
+from torch.nn.utils.rnn import pad_sequence
 
+
+# dataset for cnn
 class HmDataset(Dataset):
     def __init__(self, df_path, transforms=None, mode='3ch'):
         self.df = pd.read_csv(df_path)
@@ -53,3 +56,51 @@ class HmDataset(Dataset):
 
     def __len__(self):
         return len(self.df)
+
+
+# dataset for rnn
+class SequentialHmData(Dataset):
+    def __init__(self, feature_path, df_path):
+        self.feature_df = pd.read_csv(feature_path)
+        self.ref_df = pd.read_csv(df_path)
+        self.person_ids = self.ref_df.study_instance_uid.unique()
+        
+    def __getitem__(self, index):
+        # get patient id
+        current_person_id = self.person_ids[index]
+        
+        # get filenames corresponding with patient id
+        filenames = self.ref_df[self.ref_df.study_instance_uid==current_person_id].filename
+        df_current_person = self.feature_df[self.feature_df.filename.isin(filenames)]
+        
+        # get predicted label and features from cnn outputs
+        pred_label = df_current_person.iloc[:,1:7].values
+        pred_features = df_current_person.iloc[:,7:].values
+        
+        # get get label
+        gt_label = self.ref_df[self.ref_df.study_instance_uid==current_person_id].loc[:,'epidural':'any'].values
+        
+        
+        return torch.from_numpy(pred_label), torch.from_numpy(pred_features), torch.from_numpy(gt_label)
+    
+    def __len__(self):
+        return len(self.ref_df.study_instance_uid.unique())
+    
+def make_pad_sequence(datas):
+    
+    pred_labels = [data[0] for data in datas]
+    pred_features = [data[1] for data in datas]
+    gt_labels = [data[2] for data in datas]
+
+    # pad all sequence corresponding with Sequence Length
+    pred_labels = pad_sequence(pred_labels, batch_first=True)
+    pred_features = pad_sequence(pred_features, batch_first=True)
+    gt_labels = pad_sequence(gt_labels, batch_first=True)
+
+    # shape: (N, SL, F) -> (N, SL, 1, F) -> (N, F, SL, 1) 
+    pred_labels = pred_labels.unsqueeze(dim=2).permute(0,3,1,2)
+    pred_features = pred_features.unsqueeze(dim=2).permute(0,3,1,2)
+    gt_labels = gt_labels.unsqueeze(dim=2).permute(0,3,1,2)
+        
+    return pred_labels, pred_features, gt_labels
+

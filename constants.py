@@ -10,12 +10,12 @@ MODEL_NAME = 'DenseNet121'
 LOSS_NAME = 'BCE'
 EPOCHS = 100
 BATCH_SIZE = 64
-INITIAL_LR = 0.001
+INITIAL_LR = 0.005
 
 # etc path
 MODEL_WEIGHTS_SAVE_PATH = './checkpoints/'
-MODEL_WEIGHTS_LOAD_PATH = './checkpoints/'
-TENSORBOARD_PATH = './tensorboard/'
+MODEL_WEIGHTS_LOAD_PATH = './checkpoints/cnn'
+TENSORBOARD_PATH = './tensorboard/cnn'
 
 # gpu settings
 IS_GPU_PARALLEL = True if torch.cuda.device_count()>1 else False
@@ -24,5 +24,5 @@ IS_GPU_PARALLEL = True if torch.cuda.device_count()>1 else False
 timestamp = datetime.now().strftime('%y%m%d_%H%M%S')
 TRAIN_ID = f'{timestamp}_{MODEL_NAME}_LR{INITIAL_LR}_BS{BATCH_SIZE}_{LOSS_NAME}Loss'
 
-# dataset mode
+# dataset mode in cnn
 DATASET_MODE = 'sequential' # '3ch' or 'sequential'
