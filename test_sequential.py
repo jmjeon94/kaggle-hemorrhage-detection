@@ -1,5 +1,5 @@
 from utils.checkpoints import load_checkpoint
-from utils.metrics import print_metrics, weighted_log_loss
+from utils.metrics import print_metrics
 from constants import *
 from models.SequenceModel import SequenceModel
 from dataloader.dataloader import SequentialHmData, make_pad_sequence
@@ -21,19 +21,20 @@ train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, collate_fn=
 valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 test_loader  = DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 
+# get device type
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 # create model
 model = SequenceModel()
-# criterion = nn.BCELoss()
+criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
 optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
 
 model, _, _, epoch = load_checkpoint('./checkpoints/rnn/200616_143111_SequentialGRU_LR0.001_BS4_BCELoss/030.pth', model,
                                      optimizer)
-
-# get device type
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 # test 평가
+wLoss = []
 with torch.no_grad():
     for i, (p_labels, p_features, targets) in enumerate(tqdm(test_loader, position=0, leave=True)):
 
@@ -42,6 +43,9 @@ with torch.no_grad():
 
         # inference
         _, pred_seq2 = model(p_features.float(), p_labels.float())
+
+        # get weighted bce loss
+        wLoss.append(criterion(pred_seq2.squeeze(3).squeeze(0), targets.squeeze(3).squeeze(0).float()).item())
 
         # cuda to cpu(numpy)
         pred_seq2 = pred_seq2.squeeze(3).squeeze(0).transpose(0, 1).cpu().detach().numpy().round()
@@ -55,4 +59,5 @@ with torch.no_grad():
             y_pred = np.concatenate([y_pred, pred_seq2], axis=0)
 
     print_metrics(y_true, y_pred)
+    print(np.sum(wLoss))
 

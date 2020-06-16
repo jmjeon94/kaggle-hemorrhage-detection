@@ -12,13 +12,15 @@ import torch.nn as nn
 from tqdm import tqdm
 import numpy as np
 
-# get test data loader
+# get transforms
 transforms = build_transform()
 
+# get dataset
 train_dataset = HmDataset(df_path='./dataset/train.csv', transforms=transforms, mode=DATASET_MODE)
 valid_dataset = HmDataset(df_path='./dataset/valid.csv', transforms=transforms, mode=DATASET_MODE)
 test_dataset = HmDataset(df_path='./dataset/test.csv', transforms=transforms, mode=DATASET_MODE)
 
+# get dataloader
 train_loader = DataLoader(train_dataset,
                          batch_size=1,
                          shuffle=True,
@@ -34,28 +36,34 @@ test_loader = DataLoader(test_dataset,
 
 # create model
 model = DenseNet121_change_avg()
-criterion = nn.BCELoss()
+
+# get device type
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+# set loss function, optimizer
+criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
 optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
 
 # load model weights
 model, _, _, epoch = load_checkpoint('./checkpoints/cnn/200615_135016_DenseNet121_LR0.001_BS64_BCELoss/030.pth', model, optimizer)
-
-# get device type
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 # test 평가
+wLoss=[]
 with torch.no_grad():
     
     # test_loss = fit('Test', epoch, model, test_loader, optimizer, criterion, device)
 
-    for i, (filename, targets, inputs) in enumerate(tqdm(train_loader, position=0, leave=True)):
+    for i, (filename, targets, inputs) in enumerate(tqdm(test_loader, position=0, leave=True)):
 
         # get data
         inputs, targets = inputs.to(device), targets.to(device)
 
         # inference
         preds, _ = model(inputs)
+
+        # get weighted bce loss
+        wLoss.append(criterion(preds, targets).item())
 
         # cuda to cpu(numpy)
         preds = preds.cpu().detach().numpy().round()
@@ -68,4 +76,5 @@ with torch.no_grad():
             y_true = np.concatenate([y_true, targets], axis=0)
             y_pred = np.concatenate([y_pred, preds], axis=0)
 
+    print('Loss: ', np.mean(wLoss))
     print_metrics(y_true, y_pred)

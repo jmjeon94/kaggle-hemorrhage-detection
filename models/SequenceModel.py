@@ -77,7 +77,7 @@ class SequenceModel(nn.Module):
         out1_sigmoid = torch.sigmoid(out1) # (N, 6, LenSeq, 1)
         
         # concat cnn out, seq1 out
-        x = torch.cat([x, out1], dim=1) # (N, 12, LenSeq, 1)
+        x = torch.cat([x, out1_sigmoid], dim=1) # (N, 12, LenSeq, 1)
         
         ############### Seq2 ################
         # stem_fc
@@ -94,8 +94,7 @@ class SequenceModel(nn.Module):
         out22 = self.final(x) #(N, 6, LenSeq, 1)
         
         # seq2 output (Elementwise Sum)
-        out2 = out21 + out22
-        out2_sigmoid = torch.sigmoid(out2) # (N, 6, LenSeq, 1)
-        
-        return out1_sigmoid, out2_sigmoid
+        out2 = out21 + out22 # (N, 6, LenSeq, 1)
+
+        return out1, out2
 

@@ -33,7 +33,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 # get loss, optimizer
-criterion = nn.BCELoss()
+criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
 optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
 
 # tensorboard log
