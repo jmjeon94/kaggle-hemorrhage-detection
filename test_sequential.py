@@ -26,17 +26,17 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # create model
 model = SequenceModel()
-criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
+# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
+criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
 
-model, _, _, epoch = load_checkpoint('./checkpoints/rnn/200616_143111_SequentialGRU_LR0.001_BS4_BCELoss/030.pth', model,
-                                     optimizer)
+model, _, _, epoch = load_checkpoint('./checkpoints/rnn/200617_132046_SequentialGRU_LR0.001_BS8_BCELoss/100.pth', model, optimizer)
 model.to(device)
 
 # test 평가
 wLoss = []
 with torch.no_grad():
-    for i, (p_labels, p_features, targets) in enumerate(tqdm(test_loader, position=0, leave=True)):
+    for i, (p_labels, p_features, targets) in enumerate(tqdm(train_loader, position=0, leave=True)):
 
         # get data
         p_labels, p_features, targets = p_labels.to(device), p_features.to(device), targets.to(device)
@@ -44,11 +44,15 @@ with torch.no_grad():
         # inference
         _, pred_seq2 = model(p_features.float(), p_labels.float())
 
+        # reshape to calculate weighted bce loss -> 마지막 axis를 기준으로 weight을 줌
+        p = pred_seq2.permute(0, 2, 3, 1)
+        t = targets.permute(0, 2, 3, 1).float()
+
         # get weighted bce loss
-        wLoss.append(criterion(pred_seq2.squeeze(3).squeeze(0), targets.squeeze(3).squeeze(0).float()).item())
+        wLoss.append(criterion(p, t).item())
 
         # cuda to cpu(numpy)
-        pred_seq2 = pred_seq2.squeeze(3).squeeze(0).transpose(0, 1).cpu().detach().numpy().round()
+        pred_seq2 = torch.sigmoid(pred_seq2).squeeze(3).squeeze(0).transpose(0, 1).cpu().detach().numpy().round()
         targets = targets.squeeze(3).squeeze(0).transpose(0, 1).cpu().detach().numpy()
 
         if i == 0:
@@ -59,5 +63,5 @@ with torch.no_grad():
             y_pred = np.concatenate([y_pred, pred_seq2], axis=0)
 
     print_metrics(y_true, y_pred)
-    print(np.sum(wLoss))
+    print('Loss: {:.3f}'.format(np.mean(wLoss)))
 

@@ -7,7 +7,7 @@ DATA_IMG_PATH = '../dataset/kaggle_rsna(only600)/'
 
 # hyper parameter
 MODEL_NAME = 'SequentialGRU'
-LOSS_NAME = 'BCE'
+LOSS_NAME = 'BCE' # BCEWithLogitsLoss
 EPOCHS = 100
 BATCH_SIZE = 4
 INITIAL_LR = 0.001

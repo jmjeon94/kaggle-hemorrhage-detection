@@ -33,8 +33,10 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 # get loss, optimizer
-criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
-optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
+# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
+criterion = nn.BCEWithLogitsLoss()
+optimizer = optim.Adam(model.parameters(), lr=3e-4)
+scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [20, 30, 40], gamma=0.1)
 
 # tensorboard log
 writer = SummaryWriter(log_dir=os.path.join(TENSORBOARD_PATH, TRAIN_ID))
@@ -48,7 +50,10 @@ for epoch in range(1, EPOCHS+1):
     train_loss = fit('Train', epoch, model, train_loader, optimizer, criterion, device)
     with torch.no_grad():
         valid_loss = fit('Valid', epoch, model, valid_loader, optimizer, criterion, device)
-        
+
+    # lr scheduler update
+    scheduler.step()
+
     # log
     train_losses.append(train_loss)
     valid_losses.append(valid_loss)
@@ -56,35 +61,37 @@ for epoch in range(1, EPOCHS+1):
     # tensor board
     writer.add_scalar('Loss/Train/', train_loss, epoch)
     writer.add_scalar('Loss/Valid/', valid_loss, epoch)
+    writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], epoch)
 
     # save model
     save_checkpoint(epoch, model, optimizer, 'rnn', TRAIN_ID)
     
-#     if epoch%10==0:
-#         send_mail(f'[Epoch:{epoch}]학습 진행중', '')
+    # if epoch%10==0:
+    #     send_mail(f'[Epoch:{epoch}]학습 진행중', '')
     
-# send_mail(f'[알림]학습완료','EC2 종료할 것!!')
+send_mail(f'[알림]학습완료','EC2 종료할 것!!')
 
 
 
 ### test
-for i, (p_labels, p_features, targets) in enumerate(test_loader):
-    
-    # get data
-    p_labels, p_features, targets = p_labels.to(device), p_features.to(device), targets.to(device)
-    
-    # inference
-    _, pred_seq2 = model(p_features.float(), p_labels.float())
-    
-    # cuda to cpu(numpy)
-    pred_seq2 = pred_seq2.squeeze(3).squeeze(0).transpose(0,1).cpu().detach().numpy().round()
-    targets = targets.squeeze(3).squeeze(0).transpose(0,1).cpu().detach().numpy()
-    
-    if i==0:
-        y_true = targets
-        y_pred = pred_seq2
-    else:
-        y_true = np.concatenate([y_true, targets], axis=0)
-        y_pred = np.concatenate([y_pred, pred_seq2], axis=0)
+with torch.no_grad():
+    for i, (p_labels, p_features, targets) in enumerate(test_loader):
 
-print_metrics(y_true, y_pred)
+        # get data
+        p_labels, p_features, targets = p_labels.to(device), p_features.to(device), targets.to(device)
+
+        # inference
+        _, pred_seq2 = model(p_features.float(), p_labels.float())
+
+        # cuda to cpu(numpy)
+        pred_seq2 = torch.sigmoid(pred_seq2).squeeze(3).squeeze(0).transpose(0,1).cpu().detach().numpy().round()
+        targets = targets.squeeze(3).squeeze(0).transpose(0,1).cpu().detach().numpy()
+
+        if i==0:
+            y_true = targets
+            y_pred = pred_seq2
+        else:
+            y_true = np.concatenate([y_true, targets], axis=0)
+            y_pred = np.concatenate([y_pred, pred_seq2], axis=0)
+
+    print_metrics(y_true, y_pred)

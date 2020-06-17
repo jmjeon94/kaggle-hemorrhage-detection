@@ -22,15 +22,15 @@ test_dataset = HmDataset(df_path='./dataset/test.csv', transforms=transforms, mo
 
 # get dataloader
 train_loader = DataLoader(train_dataset,
-                         batch_size=1,
+                         batch_size=BATCH_SIZE,
                          shuffle=True,
                          num_workers=4)
 valid_loader = DataLoader(valid_dataset,
-                         batch_size=1,
+                         batch_size=BATCH_SIZE,
                          shuffle=False,
                          num_workers=4)
 test_loader = DataLoader(test_dataset,
-                        batch_size=1,
+                        batch_size=BATCH_SIZE,
                         shuffle=False,
                         num_workers=1)
 
@@ -42,11 +42,12 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # set loss function, optimizer
 criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
-optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
+optimizer = optim.Adam(model.parameters())
 
 # load model weights
-model, _, _, epoch = load_checkpoint('./checkpoints/cnn/200615_135016_DenseNet121_LR0.001_BS64_BCELoss/030.pth', model, optimizer)
+model, _, _, epoch = load_checkpoint('./checkpoints/cnn/200616_182029_DenseNet121_LR0.0005_BS64_BCELoss/034.pth', model, optimizer)
 model.to(device)
+model.eval()
 
 # test 평가
 wLoss=[]
@@ -63,10 +64,11 @@ with torch.no_grad():
         preds, _ = model(inputs)
 
         # get weighted bce loss
-        wLoss.append(criterion(preds, targets).item())
+        loss = criterion(preds, targets).item()
+        wLoss.append(loss)
 
         # cuda to cpu(numpy)
-        preds = preds.cpu().detach().numpy().round()
+        preds = torch.sigmoid(preds).cpu().detach().numpy().round()
         targets = targets.cpu().detach().numpy()
 
         if i == 0:
@@ -76,5 +78,5 @@ with torch.no_grad():
             y_true = np.concatenate([y_true, targets], axis=0)
             y_pred = np.concatenate([y_pred, preds], axis=0)
 
-    print('Loss: ', np.mean(wLoss))
+    print('Loss: {:.2f}'.format(np.mean(wLoss)))
     print_metrics(y_true, y_pred)

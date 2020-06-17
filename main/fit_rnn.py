@@ -17,6 +17,11 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
 
         logit1, logit2 = model(pred_feature.float(), pred_label.float())
 
+        # reshape to get weighted criterion -> 마지막 axis를 기준으로 weight를 줌
+        logit1 = logit1.permute(0, 2, 3, 1)
+        logit2 = logit2.permute(0, 2, 3, 1)
+        gt_label = gt_label.permute(0, 2, 3, 1)
+
         loss1 = criterion(logit1, gt_label.float())
         loss2 = criterion(logit2, gt_label.float())
 
