@@ -33,10 +33,10 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 # get loss, optimizer
-# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
+# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.Adam(model.parameters(), lr=3e-4)
-scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [20, 30, 40], gamma=0.1)
+optimizer = optim.Adam(model.parameters(), lr=INITIAL_LR)
+scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [30, 50, 70, 80], gamma=0.1)
 
 # tensorboard log
 writer = SummaryWriter(log_dir=os.path.join(TENSORBOARD_PATH, TRAIN_ID))
@@ -74,6 +74,7 @@ send_mail(f'[알림]학습완료','EC2 종료할 것!!')
 
 
 ### test
+model.eval()
 with torch.no_grad():
     for i, (p_labels, p_features, targets) in enumerate(test_loader):
 

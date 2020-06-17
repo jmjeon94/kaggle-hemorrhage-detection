@@ -8,8 +8,7 @@
 */.ipynb_checkpoints
 
 */__pycache__
-/__pycache_
+/__pycache__
+/__pycache__/*.pyc
 
-
-/hello.ipynb
-/hello.py
+/nohup.out

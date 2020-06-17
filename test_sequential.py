@@ -26,17 +26,17 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # create model
 model = SequenceModel()
-# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
+# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.SGD(model.parameters(), lr=INITIAL_LR, momentum=0.9)
+optimizer = optim.Adam(model.parameters())
 
-model, _, _, epoch = load_checkpoint('./checkpoints/rnn/200617_132046_SequentialGRU_LR0.001_BS8_BCELoss/100.pth', model, optimizer)
+model, _, _, epoch = load_checkpoint('./checkpoints/rnn/200617_165658_SequentialGRU_LR0.001_BS4_BCEWithLogitsLossLoss/030.pth', model, optimizer)
 model.to(device)
 
 # test 평가
 wLoss = []
 with torch.no_grad():
-    for i, (p_labels, p_features, targets) in enumerate(tqdm(train_loader, position=0, leave=True)):
+    for i, (p_labels, p_features, targets) in enumerate(tqdm(test_loader, position=0, leave=True)):
 
         # get data
         p_labels, p_features, targets = p_labels.to(device), p_features.to(device), targets.to(device)

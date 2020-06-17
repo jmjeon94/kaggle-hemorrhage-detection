@@ -41,7 +41,7 @@ model = DenseNet121_change_avg()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # set loss function, optimizer
-criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([2.0, 1.0, 1.0, 1.0, 1.0, 1.0]).to(device))
+criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
 optimizer = optim.Adam(model.parameters())
 
 # load model weights
