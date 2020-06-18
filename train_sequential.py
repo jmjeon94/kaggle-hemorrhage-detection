@@ -1,6 +1,7 @@
 import numpy as np
 import os
 
+import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
@@ -10,19 +11,25 @@ from utils.mails import send_mail
 from utils.checkpoints import save_checkpoint
 from utils.metrics import print_metrics
 
-from constants_rnn import *
 from models.SequenceModel import SequenceModel
 from dataloader.dataloader import SequentialHmData, make_pad_sequence
 from main.fit_rnn import fit
+from config.default_config import get_cfg_defaults
+
+# get config
+cfg = get_cfg_defaults()
+cfg.merge_from_file('config/config_rnn.yaml')
+cfg.freeze()
+print(cfg)
 
 # dataset 생성
-train_dataset = SequentialHmData(feature_path='./dataset/train_features.csv', df_path='./dataset/train.csv')
-valid_dataset = SequentialHmData(feature_path='./dataset/valid_features.csv', df_path='./dataset/valid.csv')
-test_dataset = SequentialHmData(feature_path='./dataset/test_features.csv', df_path='./dataset/test.csv')
+train_dataset = SequentialHmData(feature_path=cfg.DATASET.TRAIN_FEATURE_PATH, df_path=cfg.DATASET.TRAIN_PATH)
+valid_dataset = SequentialHmData(feature_path=cfg.DATASET.VALID_FEATURE_PATH, df_path=cfg.DATASET.VALID_PATH)
+test_dataset = SequentialHmData(feature_path=cfg.DATASET.TEST_FEATURE_PATH, df_path=cfg.DATASET.TEST_PATH)
 
 # dataloader 생성
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=make_pad_sequence)
-valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=make_pad_sequence)
+train_loader = DataLoader(train_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, collate_fn=make_pad_sequence)
+valid_loader = DataLoader(valid_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=False, collate_fn=make_pad_sequence)
 test_loader  = DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 
 # 모델 생성
@@ -33,18 +40,18 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model.to(device)
 
 # get loss, optimizer
-# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
-criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.Adam(model.parameters(), lr=INITIAL_LR)
+criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
+# criterion = nn.BCEWithLogitsLoss()
+optimizer = optim.Adam(model.parameters(), lr=cfg.TRAIN.INITIAL_LR)
 scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [30, 50, 70, 80], gamma=0.1)
 
 # tensorboard log
-writer = SummaryWriter(log_dir=os.path.join(TENSORBOARD_PATH, TRAIN_ID))
+writer = SummaryWriter(log_dir=os.path.join(cfg.REPORT.TENSORBOARD_PATH, cfg.REPORT.TRAIN_ID))
 train_losses = []
 valid_losses = []
 
 # train
-for epoch in range(1, EPOCHS+1):
+for epoch in range(1, cfg.TRAIN.EPOCHS+1):
         
     # fit
     train_loss = fit('Train', epoch, model, train_loader, optimizer, criterion, device)
@@ -64,7 +71,7 @@ for epoch in range(1, EPOCHS+1):
     writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], epoch)
 
     # save model
-    save_checkpoint(epoch, model, optimizer, 'rnn', TRAIN_ID)
+    save_checkpoint(epoch, model, optimizer, 'rnn', cfg.REPORT.TRAIN_ID)
     
     # if epoch%10==0:
     #     send_mail(f'[Epoch:{epoch}]학습 진행중', '')

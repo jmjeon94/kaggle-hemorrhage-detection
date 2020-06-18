@@ -1,20 +1,28 @@
 from utils.checkpoints import load_checkpoint
 from utils.metrics import print_metrics
-from constants import *
+# from constants import *
 from models.SequenceModel import SequenceModel
 from dataloader.dataloader import SequentialHmData, make_pad_sequence
 
-from torch.utils.data import DataLoader
-import torch.optim as optim
+import torch
 import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
 
 from tqdm import tqdm
 import numpy as np
+from config.default_config import get_cfg_defaults
+
+# get config
+cfg = get_cfg_defaults()
+cfg.merge_from_file('config/config_rnn.yaml')
+cfg.freeze()
+print('Checkpoint load path: ', cfg.REPORT.WEIGHTS_LOAD_PATH)
 
 # dataset 생성
-train_dataset = SequentialHmData(feature_path='./dataset/train_features.csv', df_path='./dataset/train.csv')
-valid_dataset = SequentialHmData(feature_path='./dataset/valid_features.csv', df_path='./dataset/valid.csv')
-test_dataset = SequentialHmData(feature_path='./dataset/test_features.csv', df_path='./dataset/test.csv')
+train_dataset = SequentialHmData(feature_path=cfg.DATASET.TRAIN_FEATURE_PATH, df_path=cfg.DATASET.TRAIN_PATH)
+valid_dataset = SequentialHmData(feature_path=cfg.DATASET.VALID_FEATURE_PATH, df_path=cfg.DATASET.VALID_PATH)
+test_dataset = SequentialHmData(feature_path=cfg.DATASET.TEST_FEATURE_PATH, df_path=cfg.DATASET.TEST_PATH)
 
 # dataloader 생성
 train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, collate_fn=make_pad_sequence)
@@ -26,11 +34,11 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # create model
 model = SequenceModel()
-# criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.0, 2.0]).to(device))
+# criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters())
 
-model, _, _, epoch = load_checkpoint('./checkpoints/rnn/200617_165658_SequentialGRU_LR0.001_BS4_BCEWithLogitsLossLoss/030.pth', model, optimizer)
+model, _, _, epoch = load_checkpoint(cfg.REPORT.WEIGHTS_LOAD_PATH, model, optimizer)
 model.to(device)
 
 # test 평가

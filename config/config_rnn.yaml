@@ -1,0 +1,16 @@
+MODEL:
+    NAME: 'SequentialGRU'
+    CRITERION: 'BCEWithLogitsLoss'
+    OPTIMIZER: 'Adam'
+    
+TRAIN:
+    EPOCHS: 100
+    INITIAL_LR: 0.001
+    BATCH_SIZE: 4
+    
+REPORT:
+    WEIGHTS_SAVE_PATH: './checkpoints/rnn'
+    WEIGHTS_LOAD_PATH: './checkpoints/rnn/200618_153035_SequentialGRU_LR0.001_BS4_BCEWithLogitsLoss/025.pth'
+    TENSORBOARD_PATH: './tensorboard/rnn'
+    
+    

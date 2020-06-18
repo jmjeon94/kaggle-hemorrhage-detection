@@ -1,18 +1,17 @@
 import os
 import torch
-from constants import *
 
 def save_checkpoint(epoch, model, optimizer, phase, id_, scheduler=None):
     
     if not phase in ['cnn', 'rnn']:
         raise ValueError('not supported phase[{}]'.format(phase))
     
-    save_folder_dir = os.path.join(MODEL_WEIGHTS_SAVE_PATH, phase, id_)
+    save_folder_dir = os.path.join('./checkpoints/', phase, id_)
     if not os.path.exists(save_folder_dir):
         os.makedirs(save_folder_dir, exist_ok=True)
     model_save_path = os.path.join(save_folder_dir, f'{epoch:03d}.pth')
 
-    if IS_GPU_PARALLEL:
+    if torch.cuda.device_count()>1:
         model_state_dict = model.module.state_dict()
     else:
         model_state_dict = model.state_dict()

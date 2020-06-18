@@ -33,6 +33,6 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
 
         losses += loss.item()
 
-        tbar.set_description(f'[{phase}]\tEpoch:[{epoch}/{EPOCHS}]\tLoss:{losses / (i + 1):.5f}')  # '\tAcc:{acc:.2%}')
+        tbar.set_description(f'[{phase}]\tEpoch:[{epoch}/{EPOCHS}] Loss:{losses / (i + 1):.5f}')  # '\tAcc:{acc:.2%}')
 
     return losses / len(data_loader)

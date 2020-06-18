@@ -5,32 +5,40 @@ from models.densenet121 import DenseNet121_change_avg
 from dataloader.dataloader import HmDataset
 from dataloader.transforms import build_transform
 
-from torch.utils.data import DataLoader
-import torch.optim as optim
+import torch
 import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
 
 from tqdm import tqdm
 import numpy as np
+from config.default_config import get_cfg_defaults
+
+# get config
+cfg = get_cfg_defaults()
+cfg.merge_from_file('config/config_cnn.yaml')
+cfg.freeze()
+print('Checkpoint load path: ', cfg.REPORT.WEIGHTS_LOAD_PATH)
 
 # get transforms
 transforms = build_transform()
 
 # get dataset
-train_dataset = HmDataset(df_path='./dataset/train.csv', transforms=transforms, mode=DATASET_MODE)
-valid_dataset = HmDataset(df_path='./dataset/valid.csv', transforms=transforms, mode=DATASET_MODE)
-test_dataset = HmDataset(df_path='./dataset/test.csv', transforms=transforms, mode=DATASET_MODE)
+train_dataset = HmDataset(df_path=cfg.DATASET.TRAIN_PATH, transforms=transforms, mode=cfg.DATASET.MODE_CNN)
+valid_dataset = HmDataset(df_path=cfg.DATASET.VALID_PATH, transforms=transforms, mode=cfg.DATASET.MODE_CNN)
+test_dataset = HmDataset(df_path=cfg.DATASET.TEST_PATH, transforms=transforms, mode=cfg.DATASET.MODE_CNN)
 
 # get dataloader
 train_loader = DataLoader(train_dataset,
-                         batch_size=BATCH_SIZE,
+                         batch_size=cfg.TRAIN.BATCH_SIZE,
                          shuffle=True,
                          num_workers=4)
 valid_loader = DataLoader(valid_dataset,
-                         batch_size=BATCH_SIZE,
+                         batch_size=cfg.TRAIN.BATCH_SIZE,
                          shuffle=False,
                          num_workers=4)
 test_loader = DataLoader(test_dataset,
-                        batch_size=BATCH_SIZE,
+                        batch_size=cfg.TRAIN.BATCH_SIZE,
                         shuffle=False,
                         num_workers=1)
 
@@ -45,7 +53,7 @@ criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.
 optimizer = optim.Adam(model.parameters())
 
 # load model weights
-model, _, _, epoch = load_checkpoint('./checkpoints/cnn/200616_182029_DenseNet121_LR0.0005_BS64_BCELoss/034.pth', model, optimizer)
+model, _, _, epoch = load_checkpoint(cfg.REPORT.WEIGHTS_LOAD_PATH, model, optimizer)
 model.to(device)
 model.eval()
 
