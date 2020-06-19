@@ -77,7 +77,7 @@ class SequentialHmData(Dataset):
         pred_label = df_current_person.iloc[:,1:7].values
         pred_features = df_current_person.iloc[:,7:].values
         
-        # get get label
+        # get label
         gt_label = self.ref_df[self.ref_df.study_instance_uid==current_person_id].loc[:,'epidural':'any'].values
         
         
