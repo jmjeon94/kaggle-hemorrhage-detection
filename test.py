@@ -31,7 +31,7 @@ test_dataset = HmDataset(df_path=cfg.DATASET.TEST_PATH, transforms=transforms, m
 # get dataloader
 train_loader = DataLoader(train_dataset,
                          batch_size=cfg.TRAIN.BATCH_SIZE,
-                         shuffle=True,
+                         shuffle=False,
                          num_workers=4)
 valid_loader = DataLoader(valid_dataset,
                          batch_size=cfg.TRAIN.BATCH_SIZE,
@@ -60,8 +60,6 @@ model.eval()
 # test 평가
 wLoss=[]
 with torch.no_grad():
-    
-    # test_loss = fit('Test', epoch, model, test_loader, optimizer, criterion, device)
 
     for i, (filename, targets, inputs) in enumerate(tqdm(test_loader, position=0, leave=True)):
 
@@ -86,5 +84,5 @@ with torch.no_grad():
             y_true = np.concatenate([y_true, targets], axis=0)
             y_pred = np.concatenate([y_pred, preds], axis=0)
 
-    print('Loss: {:.2f}'.format(np.mean(wLoss)))
     print_metrics(y_true, y_pred)
+    print('Loss: {:.2f}'.format(np.mean(wLoss)))

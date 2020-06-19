@@ -25,7 +25,7 @@ valid_dataset = SequentialHmData(feature_path=cfg.DATASET.VALID_FEATURE_PATH, df
 test_dataset = SequentialHmData(feature_path=cfg.DATASET.TEST_FEATURE_PATH, df_path=cfg.DATASET.TEST_PATH)
 
 # dataloader 생성
-train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, collate_fn=make_pad_sequence)
+train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 test_loader  = DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 
@@ -40,6 +40,7 @@ optimizer = optim.Adam(model.parameters())
 
 model, _, _, epoch = load_checkpoint(cfg.REPORT.WEIGHTS_LOAD_PATH, model, optimizer)
 model.to(device)
+model.eval()
 
 # test 평가
 wLoss = []
