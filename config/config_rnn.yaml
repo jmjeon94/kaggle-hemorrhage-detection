@@ -10,7 +10,7 @@ TRAIN:
     
 REPORT:
     WEIGHTS_SAVE_PATH: './checkpoints/rnn'
-    WEIGHTS_LOAD_PATH: './checkpoints/rnn/200618_153035_SequentialGRU_LR0.001_BS4_BCEWithLogitsLoss/025.pth'
+    WEIGHTS_LOAD_PATH: './checkpoints/rnn/200618_153035_SequentialGRU_LR0.001_BS4_BCEWithLogitsLoss/100.pth'
     TENSORBOARD_PATH: './tensorboard/rnn'
     
     

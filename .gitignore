@@ -12,3 +12,6 @@
 /__pycache__/*.pyc
 
 /nohup.out
+
+/config/config_cnn.yaml
+/config/config_rnn.yaml

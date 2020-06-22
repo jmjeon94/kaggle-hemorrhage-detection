@@ -52,7 +52,7 @@ def get_cfg_defaults():
 
 
 if __name__=='__main__':
-    
+
     cfg = get_cfg_defaults()
     cfg.freeze()
     print(cfg)
