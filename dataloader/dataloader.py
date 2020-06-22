@@ -8,17 +8,18 @@ from torch.nn.utils.rnn import pad_sequence
 
 # dataset for cnn
 class HmDataset(Dataset):
-    def __init__(self, df_path, transforms=None, mode='3ch'):
+    def __init__(self, df_path, img_dir='../dataset/kaggle_rsna(only600)/imgs/', transforms=None, mode='3ch'):
         self.df = pd.read_csv(df_path)
         self.transforms = transforms
         self.mode = mode
+        self.img_dir = img_dir
 
     def __getitem__(self, index):
         hm_meta = self.df.iloc[index]
         filename = hm_meta.filename
         label = torch.from_numpy(hm_meta['epidural':'any'].values.astype(np.float))
 
-        img = Image.open('../dataset/kaggle_rsna(only600)/imgs/' + filename + '.png')
+        img = Image.open(self.img_dir + filename + '.png')
 
         if self.mode == 'sequential':
             study_instance_uid = hm_meta.study_instance_uid
@@ -47,8 +48,26 @@ class HmDataset(Dataset):
                                   np.expand_dims(np.array(img_prev)[:, :, 0], axis=2),
                                   np.expand_dims(np.array(img_next)[:, :, 0], axis=2)],
                                  axis=2)
+
+            # From numpy to PIL Image
             img = Image.fromarray(img)
 
+        elif self.mode=='single':
+            # get only (40, 80) window image and make it to 3 channels
+            img = np.expand_dims(np.array(img)[:,:,0], axis=2)
+            img = np.concatenate([img, img, img], axis=2)
+
+            # From numpy to PIL Image
+            img = Image.fromarray(img)
+
+        elif self.mode=='3ch':
+            # nothing to change
+            pass
+
+        else:
+            raise ValueError('Not Supported Mode[{}]'.format(self.mode))
+
+        # transform
         if self.transforms is not None:
             img = self.transforms(img)
 
