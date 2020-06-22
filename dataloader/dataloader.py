@@ -40,8 +40,8 @@ class HmDataset(Dataset):
             filename_next = tmp_df[tmp_df.slice_id == slice_id_next].iloc[0].filename
 
             # get prev, next img
-            img_prev = Image.open('../dataset/kaggle_rsna(only600)/imgs/' + filename_prev + '.png')
-            img_next = Image.open('../dataset/kaggle_rsna(only600)/imgs/' + filename_next + '.png')
+            img_prev = Image.open(self.img_dir + filename_prev + '.png')
+            img_next = Image.open(self.img_dir + filename_next + '.png')
 
             # concat 3 imgs
             img = np.concatenate([np.expand_dims(np.array(img)[:, :, 0], axis=2),
