@@ -1,6 +1,5 @@
 from utils.checkpoints import load_checkpoint
 from utils.metrics import print_metrics
-from constants import *
 from models.densenet121 import DenseNet121_change_avg
 from dataloader.dataloader import HmDataset
 from dataloader.transforms import build_transform
