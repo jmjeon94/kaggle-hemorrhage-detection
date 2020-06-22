@@ -1,7 +1,8 @@
 from tqdm import tqdm
-from constants import *
+from config.default_config import get_cfg_defaults
 
 def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
+
     losses = 0
     if phase == 'Train':
         model.train()
@@ -26,7 +27,7 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
         losses += loss.item()
 
         if phase == 'Train':
-            msg = f'[{phase}]\tEpoch:[{epoch}/{EPOCHS}] Loss:{losses / (i+1):.5f}'
+            msg = f'[{phase}]\tEpoch:{epoch:02d}, Loss:{losses / (i+1):.5f}'
         else:
             msg = f'[{phase}]\tLoss:{losses / (i+1):.5f}'
         tbar.set_description(msg)
