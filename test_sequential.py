@@ -19,13 +19,13 @@ cfg.freeze()
 print('Checkpoint load path: ', cfg.REPORT.WEIGHTS_LOAD_PATH)
 
 # dataset 생성
-train_dataset = SequentialHmData(feature_path=cfg.DATASET.TRAIN_FEATURE_PATH, df_path=cfg.DATASET.TRAIN_PATH)
-valid_dataset = SequentialHmData(feature_path=cfg.DATASET.VALID_FEATURE_PATH, df_path=cfg.DATASET.VALID_PATH)
+# train_dataset = SequentialHmData(feature_path=cfg.DATASET.TRAIN_FEATURE_PATH, df_path=cfg.DATASET.TRAIN_PATH)
+# valid_dataset = SequentialHmData(feature_path=cfg.DATASET.VALID_FEATURE_PATH, df_path=cfg.DATASET.VALID_PATH)
 test_dataset = SequentialHmData(feature_path=cfg.DATASET.TEST_FEATURE_PATH, df_path=cfg.DATASET.TEST_PATH)
 
 # dataloader 생성
-train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
-valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
+# train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
+# valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 test_loader  = DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=make_pad_sequence)
 
 # get device type
@@ -47,7 +47,7 @@ with torch.no_grad():
     for i, (p_labels, p_features, targets) in enumerate(tqdm(test_loader, position=0, leave=True)):
 
         # get data
-        p_labels, p_features, targets = p_labels.to(device), p_features.to(device), targets.to(device)
+        p_labels, p_features, targets, filenames = p_labels.to(device), p_features.to(device), targets.to(device)
 
         # inference
         _, pred_seq2 = model(p_features.float(), p_labels.float())

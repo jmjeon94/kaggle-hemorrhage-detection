@@ -91,6 +91,9 @@ class SequentialHmData(Dataset):
         # get filenames corresponding with patient id
         filenames = self.ref_df[self.ref_df.study_instance_uid==current_person_id].filename
         df_current_person = self.feature_df[self.feature_df.filename.isin(filenames)]
+
+        # get filenames
+        filenames = df_current_person.iloc[:,0].values
         
         # get predicted label and features from cnn outputs
         pred_label = df_current_person.iloc[:,1:7].values
@@ -100,7 +103,7 @@ class SequentialHmData(Dataset):
         gt_label = self.ref_df[self.ref_df.study_instance_uid==current_person_id].loc[:,'epidural':'any'].values
         
         
-        return torch.from_numpy(pred_label), torch.from_numpy(pred_features), torch.from_numpy(gt_label)
+        return torch.from_numpy(pred_label), torch.from_numpy(pred_features), torch.from_numpy(gt_label), filenames
     
     def __len__(self):
         return len(self.ref_df.study_instance_uid.unique())
@@ -110,6 +113,7 @@ def make_pad_sequence(datas):
     pred_labels = [data[0] for data in datas]
     pred_features = [data[1] for data in datas]
     gt_labels = [data[2] for data in datas]
+    filenames = [data[3] for data in datas]
 
     # pad all sequence corresponding with Sequence Length
     pred_labels = pad_sequence(pred_labels, batch_first=True)
@@ -121,5 +125,5 @@ def make_pad_sequence(datas):
     pred_features = pred_features.unsqueeze(dim=2).permute(0,3,1,2)
     gt_labels = gt_labels.unsqueeze(dim=2).permute(0,3,1,2)
         
-    return pred_labels, pred_features, gt_labels
+    return pred_labels, pred_features, gt_labels, filenames
 
