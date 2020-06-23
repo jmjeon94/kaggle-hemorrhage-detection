@@ -19,7 +19,7 @@ Leaderboard 1st source
 ###### 데이터프레임 재가공
 * meta 데이터 중 study_instance_uid가 같으면 같은 환자
 * 같은 환자 중 Image Position2 값으로 sequential하게 정렬(slice_id column 추가)
-###### 학습 단위 별로 데이터 분 
+###### 학습 단위 별로 데이터 분리
 * 각각의 train.csv, valid.csv, test.csv로 분리
 * hemorrhage, normal 환자를 각각 500명, 100명 추출
 
@@ -61,6 +61,7 @@ $ python3 train_sequential.py
 $ python3 test_sequential.py
 ```
 
-## Architecture
+### 참고링크
+[kaggle 1위 설명](https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/117210)
 
 
