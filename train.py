@@ -20,6 +20,9 @@ cfg.merge_from_file('config/config_cnn.yaml')
 cfg.freeze()
 print(cfg)
 
+# train id (체크포인트, 텐서보드 저장 시 폴더 명)
+TRAIN_ID = f'{cfg.REPORT.TIMESTAMP}_{cfg.MODEL.NAME}_LR{cfg.TRAIN.INITIAL_LR}_BS{cfg.TRAIN.BATCH_SIZE}_{cfg.MODEL.CRITERION}'
+
 # 모델 생성
 model = DenseNet121_change_avg()
 # summary(model, (3,512,512), device='cpu')
@@ -51,7 +54,9 @@ criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([1.0, 1.0, 1.0, 1.0, 1.
 optimizer = optim.Adam(model.parameters(), lr=cfg.TRAIN.INITIAL_LR, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.00002)
 
 # tensorboard log
-writer = SummaryWriter(log_dir=os.path.join(cfg.REPORT.TENSORBOARD_PATH, cfg.REPORT.TRAIN_ID))
+use_tensorboard = cfg.REPORT.USE_TENSORBOARD
+if use_tensorboard:
+    writer = SummaryWriter(log_dir=os.path.join(cfg.REPORT.TENSORBOARD_PATH, TRAIN_ID))
 train_losses = []
 valid_losses = []
 
@@ -67,11 +72,12 @@ for epoch in range(1, cfg.TRAIN.EPOCHS+1):
     valid_losses.append(valid_loss)
     
     # tensor board
-    writer.add_scalar('Loss/Train/', train_loss, epoch)
-    writer.add_scalar('Loss/Valid/', valid_loss, epoch)
+    if use_tensorboard:
+        writer.add_scalar('Loss/Train/', train_loss, epoch)
+        writer.add_scalar('Loss/Valid/', valid_loss, epoch)
 
     # save model
-    save_checkpoint(epoch, model, optimizer, 'cnn', cfg.REPORT.TRAIN_ID)
+    save_checkpoint(epoch, model, optimizer, 'cnn', TRAIN_ID)
 
     if epoch%10==0:
         send_mail(f'[Epoch:{epoch}]학습 진행중', '')

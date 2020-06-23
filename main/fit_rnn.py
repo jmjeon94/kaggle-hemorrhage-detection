@@ -8,9 +8,9 @@ def fit(phase, epoch, model, data_loader, optimizer, criterion, device):
         model.eval()
 
     tbar = tqdm(data_loader, position=0, leave=True)
-    for i, (pred_label, pred_feature, gt_label) in enumerate(tbar):
+    for i, (pred_label, pred_feature, gt_label, _) in enumerate(tbar):
 
-        pred_label, pred_feature, gt_label, _ = pred_label.to(device), pred_feature.to(device), gt_label.to(device)
+        pred_label, pred_feature, gt_label = pred_label.to(device), pred_feature.to(device), gt_label.to(device)
 
         optimizer.zero_grad()
 

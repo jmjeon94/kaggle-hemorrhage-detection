@@ -41,11 +41,11 @@ _C.MODEL.OPTIMIZER = 'Adam'
 # Report infos
 # ---------------------------------------------------------------------------- #
 _C.REPORT = CN()
+_C.REPORT.USE_TENSORBOARD = False
 _C.REPORT.TENSORBOARD_PATH = './tensorboard/'
 _C.REPORT.WEIGHTS_SAVE_PATH = './checkpoints/'
 _C.REPORT.WEIGHTS_LOAD_PATH = ''
-timestamp = datetime.now().strftime('%y%m%d_%H%M%S')
-_C.REPORT.TRAIN_ID = f'{timestamp}_{_C.MODEL.NAME}_LR{_C.TRAIN.INITIAL_LR}_BS{_C.TRAIN.BATCH_SIZE}_{_C.MODEL.CRITERION}'
+_C.REPORT.TIMESTAMP = datetime.now().strftime('%y%m%d_%H%M%S')
 
 def get_cfg_defaults():
     return _C.clone()
